@@ -16,9 +16,17 @@ public Plugin myinfo =
 	url = "https://github.com//dewbsku"
 };
 
-public void OnPluginStart()
+public void OnMapStart()
 {
-    if(GameRules_GetProp("m_nGameType") == 2) CreateTimer(0.5, CheckRoundTime, _, TIMER_REPEAT); // gametype == 2 is control points
+    if(GameRules_GetProp("m_nGameType") == 2) CreateTimer(15.0, WaitTime, _, TIMER_FLAG_NO_MAPCHANGE); // gametype == 2 is control points
+}
+
+public Action WaitTime(Handle timer){
+    ServerCommand("mp_timelimit 30");
+    ServerCommand("mp_winlimit 5");
+    PrintToChatAll("Running Soft Match Timer...");
+    PrintToServer("Running Soft Match Timer...");
+    CreateTimer(0.5, CheckRoundTime, _, TIMER_REPEAT);
 }
 
 public Action CheckRoundTime(Handle timer){
