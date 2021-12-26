@@ -8,7 +8,7 @@ public Plugin myinfo =
 	name = "Improved Match Timer",
 	author = "Dooby Skoo",
 	description = "TF2 winlimit gets reduced after 30 minutes on 5CP.",
-	version = "1.0.0",
+	version = "1.0.1",
 	url = "https://github.com//dewbsku"
 };
 
@@ -21,8 +21,8 @@ public void OnMapStart()
 }
 
 public Action WaitTime(Handle timer){
-    PrintToChatAll("Running Soft Match Timer...");
-    PrintToServer("Running Soft Match Timer...");
+    PrintToChatAll("Running Improved Match Timer...");
+    PrintToServer("Running Improved Match Timer...");
     CreateTimer(0.5, CheckRoundTime, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 }
 
