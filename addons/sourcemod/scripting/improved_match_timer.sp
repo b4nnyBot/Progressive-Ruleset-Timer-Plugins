@@ -1,10 +1,11 @@
 #include <tf2_morestocks>
+#include <string>
 #pragma newdecls required
 #pragma semicolon 1
 
 public Plugin myinfo =
 {
-	name = "Soft Match Timer",
+	name = "Improved Match Timer",
 	author = "Dooby Skoo",
 	description = "TF2 winlimit gets reduced after 30 minutes on 5CP.",
 	version = "1.0.0",
@@ -13,12 +14,13 @@ public Plugin myinfo =
 
 public void OnMapStart()
 {
-    if(GameRules_GetProp("m_nGameType") == 2) CreateTimer(15.0, WaitTime, _, TIMER_FLAG_NO_MAPCHANGE); // gametype == 2 is control points
+    char mapname[64];
+    
+    GetCurrentMap(mapname, 64);
+    if(StrContains(mapname, "cp_", true) == 0) CreateTimer(15.0, WaitTime, _, TIMER_FLAG_NO_MAPCHANGE);
 }
 
 public Action WaitTime(Handle timer){
-    //ServerCommand("mp_timelimit 30");
-    //ServerCommand("mp_winlimit 5");
     PrintToChatAll("Running Soft Match Timer...");
     PrintToServer("Running Soft Match Timer...");
     CreateTimer(0.5, CheckRoundTime, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
