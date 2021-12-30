@@ -55,7 +55,7 @@ public Action CheckRoundTime(Handle timer){
     int timeleft;
     GetMapTimeLeft(timeleft);
     if(timeleft<=1){
-        ServerCommand("mp_timelimit 0");
+        //ServerCommand("mp_timelimit 0");
         int newRoundLimit = GetTeamScore(3) + 1;
         if(GetTeamScore(2)+1>GetTeamScore(3)+1) newRoundLimit = GetTeamScore(2)+1;
         if(newRoundLimit>5) newRoundLimit = 5;
