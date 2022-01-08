@@ -12,7 +12,7 @@
  Place the addons folder into the tf directory.
 
  # How to Use
- Improved Match Timer creates a new cvar named "mp_timelimit_improved" which is by default 0. This means that the plugin by default does nothing. I recommend that you change this cvar only through ruleset related configs. I've provided a modified rgl_6s_5cp_scrim config that contains "mp_timelimit_improved 1".
+ Improved Match Timer creates a new cvar named "mp_timelimit_improved" which is by default 0. This means that the plugin by default does nothing. I recommend that you change this cvar only through ruleset related configs. I've provided a modified rgl_6s_5cp_scrim config that contains "mp_timelimit_improved 1" as an example.
 
  The plugin is only active on cp_ maps when mp_timelimit is above 0 and mp_timelimit_improved is set to 1. These conditions must be met before the match begins. If the plugin is active, you should see the phrase "Running Improved Match Timer..." in chat after the match starts. If you need to toggle the plugin, simply exec a config with mp_timelimit_improved changed before readying up.
 
