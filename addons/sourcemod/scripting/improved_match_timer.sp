@@ -3,21 +3,33 @@
 #pragma newdecls required
 #pragma semicolon 1
 
-ConVar cvar_timelimit;
-ConVar cvar_restartgame;
+
 bool doOnRestart = true;
 char mapname[64];
+
+//timers
 Handle timer1 = INVALID_HANDLE;
 Handle timer2 = INVALID_HANDLE;
+
+//Default ConVars
+ConVar cvar_timelimit;
+ConVar cvar_restartgame;
+
+//Custom ConVars
+ConVar enabled;
 
 public Plugin myinfo =
 {
 	name = "Improved Match Timer",
 	author = "Dooby Skoo",
 	description = "TF2 round win limit gets reduced after 30 minutes on 5CP.",
-	version = "1.0.4",
+	version = "1.1.0",
 	url = "https://github.com//dewbsku"
 };
+
+public void OnPluginStart(){
+    enabled = CreateConVar("mp_timelimit_improved", "0", "Determines whether the plugin should do anything. 0 off (default), 1 on.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+}
 
 public void OnMapStart()
 {
@@ -30,7 +42,7 @@ public void OnMapStart()
 }
 
 public void OnRestartGame(ConVar convar, char[] oldValue, char[] newValue){
-    if(StrContains(mapname, "cp_", true) == 0 && cvar_timelimit.IntValue != 0 && doOnRestart){
+    if(StrContains(mapname, "cp_", true) == 0 && cvar_timelimit.IntValue != 0 && doOnRestart && enabled.BoolValue == true){
         if(timer1 != INVALID_HANDLE){
             KillTimer(timer1);
             timer1 = INVALID_HANDLE;
@@ -41,6 +53,16 @@ public void OnRestartGame(ConVar convar, char[] oldValue, char[] newValue){
         }
         timer1 = CreateTimer(6.0, WaitTime, _, TIMER_FLAG_NO_MAPCHANGE);
         doOnRestart = false;
+    }
+    else if(doOnRestart){
+        if(timer1 != INVALID_HANDLE){
+            KillTimer(timer1);
+            timer1 = INVALID_HANDLE;
+        }
+        if(timer2 != INVALID_HANDLE){
+            KillTimer(timer2);
+            timer2 = INVALID_HANDLE;
+        }
     }
 }
 
