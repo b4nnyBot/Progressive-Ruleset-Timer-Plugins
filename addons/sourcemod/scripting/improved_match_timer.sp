@@ -5,6 +5,8 @@
 
 bool doOnRestart = true;
 char mapname[64];
+int winlimit_original = -1;
+int timelimit_original = -1;
 
 //timers
 Handle timer1 = INVALID_HANDLE;
@@ -13,6 +15,7 @@ Handle timer2 = INVALID_HANDLE;
 //Default ConVars
 ConVar cvar_timelimit;
 ConVar cvar_restartgame;
+ConVar cvar_winlimit;
 
 //Custom ConVars
 ConVar mp_timelimit_improved;
@@ -22,7 +25,7 @@ public Plugin myinfo =
 	name = "Improved Match Timer",
 	author = "Dooby Skoo",
 	description = "TF2 round win limit gets reduced after the map timer runs out on 5CP.",
-	version = "1.1.2",
+	version = "1.1.3",
 	url = "https://github.com//dewbsku"
 };
 
@@ -30,6 +33,7 @@ public void OnPluginStart(){
     mp_timelimit_improved = CreateConVar("mp_timelimit_improved", "0", "Determines whether the plugin should do anything. 0 off (default), 1 on.", FCVAR_NONE, true, 0.0, true, 1.0);
     cvar_timelimit = FindConVar("mp_timelimit");
     cvar_restartgame = FindConVar("mp_restartgame");
+    cvar_winlimit = FindConVar("mp_winlimit");
     cvar_restartgame.AddChangeHook(OnRestartGame);
 }
 
@@ -41,6 +45,12 @@ public void OnMapStart()
 }
 
 public void OnRestartGame(ConVar convar, char[] oldValue, char[] newValue){
+    if(timelimit_original==-1) timelimit_original = cvar_timelimit.IntValue;
+    if(winlimit_original==-1) winlimit_original = cvar_winlimit.IntValue;
+
+    if(cvar_timelimit.IntValue!=timelimit_original) ServerCommand("mp_timelimit %d", timelimit_original);
+    if(cvar_winlimit.IntValue!=winlimit_original) ServerCommand("mp_winlimit %d", winlimit_original);
+
     if(StrContains(mapname, "cp_", true) == 0 && cvar_timelimit.IntValue != 0 && doOnRestart && mp_timelimit_improved.BoolValue == true){
         SafelyKillTimer(timer1);
         SafelyKillTimer(timer2);
