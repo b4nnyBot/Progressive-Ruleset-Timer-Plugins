@@ -19,18 +19,20 @@ ConVar cvar_winlimit;
 
 //Custom ConVars
 ConVar mp_timelimit_improved;
+ConVar mp_timelimit_improved_visibility;
 
 public Plugin myinfo =
 {
 	name = "Improved Match Timer",
 	author = "Dooby Skoo",
 	description = "TF2 round win limit gets reduced after the map timer runs out on 5CP.",
-	version = "1.1.3",
+	version = "1.1.4",
 	url = "https://github.com//dewbsku"
 };
 
 public void OnPluginStart(){
     mp_timelimit_improved = CreateConVar("mp_timelimit_improved", "0", "Determines whether the plugin should do anything. 0 off (default), 1 on.", FCVAR_NONE, true, 0.0, true, 1.0);
+    mp_timelimit_improved_visibility = CreateConVar("mp_timelimit_improved_visibility", "0", "Removes the timer when a team reaches 4 rounds won. 0 off (default), 1 on.", FCVAR_NONE, true, 0.0, true, 1.0);
     cvar_timelimit = FindConVar("mp_timelimit");
     cvar_restartgame = FindConVar("mp_restartgame");
     cvar_winlimit = FindConVar("mp_winlimit");
@@ -96,7 +98,7 @@ public Action CheckRoundTime(Handle timer){
         timer2 = INVALID_HANDLE;
         return Plugin_Stop;
     }
-    if(GetTeamScore(2) >= 4 || GetTeamScore(3) >= 4){
+    if((GetTeamScore(2) >= 4 || GetTeamScore(3) >= 4) && mp_timelimit_improved_visibility.BoolValue){
         ServerCommand("mp_timelimit 0");
         for(int client=1;client<=MAXPLAYERS;client++){
             if(IsValidClient(client)){

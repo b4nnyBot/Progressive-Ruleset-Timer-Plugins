@@ -16,5 +16,8 @@
 
  The plugin is only active on cp_ maps when mp_timelimit is above 0 and mp_timelimit_improved is set to 1. These conditions must be met before the match begins. If the plugin is active, you should see the phrase "Running Improved Match Timer..." in chat after the match starts. If you need to toggle the plugin, simply exec a config with mp_timelimit_improved changed before readying up.
 
+# Options
+ mp_timelimit_improved_visibility: Hides the match timer when a team reaches 4 rounds won. 0 off (default), 1 on.
+
 # Related Plugins
  [Improved Round Timer](https://github.com/b4nnyBot/TF2-Improved-Round-Timer-Plugin)
