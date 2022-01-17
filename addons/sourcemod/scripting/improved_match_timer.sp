@@ -27,7 +27,7 @@ public Plugin myinfo =
 	name = "Improved Match Timer",
 	author = "Dooby Skoo",
 	description = "TF2 round win limit gets reduced after the map timer runs out on 5CP.",
-	version = "1.1.5",
+	version = "1.1.6",
 	url = "https://github.com//dewbsku"
 };
 
@@ -38,6 +38,12 @@ public void OnPluginStart(){
     cvar_restartgame = FindConVar("mp_restartgame");
     cvar_winlimit = FindConVar("mp_winlimit");
     cvar_restartgame.AddChangeHook(OnRestartGame);
+    AddCommandListener(OnExec, "exec");
+}
+
+public Action OnExec(int client, const char[] command, int argc){
+    winlimit_original = -1;
+    timelimit_original = -1;
 }
 
 public void OnMapStart()
