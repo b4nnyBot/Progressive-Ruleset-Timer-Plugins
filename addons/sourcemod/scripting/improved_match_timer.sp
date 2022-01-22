@@ -7,6 +7,7 @@ bool doOnRestart = true;
 char mapname[64];
 int winlimit_original = -1;
 int timelimit_original = -1;
+int lastTimeReported=-1;
 bool rightGamemode;
 
 //timers
@@ -27,7 +28,7 @@ public Plugin myinfo =
 	name = "Improved Match Timer",
 	author = "Dooby Skoo",
 	description = "TF2 round win limit gets reduced after the map timer runs out on 5CP.",
-	version = "1.1.6",
+	version = "1.1.7",
 	url = "https://github.com//dewbsku"
 };
 
@@ -79,15 +80,16 @@ public Action WaitTime(Handle timer){
     PrintToChatAll("Running Improved Match Timer.");
     PrintToServer("Running Improved Match Timer.");
     doOnRestart = true;
-    timer2 = CreateTimer(1.0, CheckRoundTime, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+    timer2 = CreateTimer(0.5, CheckRoundTime, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
     timer1 = INVALID_HANDLE;
 }
 
 public Action CheckRoundTime(Handle timer){
     int timeleft;
     GetMapTimeLeft(timeleft);
-    if(timeleft>=300 && timeleft%300==0) DisplayClockInfo();
-    if(timeleft<300 && timeleft%60==0) DisplayClockInfo();
+    if(timeleft>=300 && timeleft%300==0 && (timeleft!=lastTimeReported)) DisplayClockInfo(timeleft);
+    if(timeleft<300 && timeleft%60==0 && (timeleft!=lastTimeReported)) DisplayClockInfo(timeleft);
+    lastTimeReported = timeleft;
     if(timeleft<=1){
         ServerCommand("mp_timelimit 0");
         int newRoundLimit = GetTeamScore(3) + 1;
@@ -128,9 +130,8 @@ bool IsValidClient(int client){
 	return ( client > 0 && client <= MaxClients && IsClientInGame(client) );
 }
 
-public void DisplayClockInfo(){
-    int timeleft, minutes, seconds;
-    GetMapTimeLeft(timeleft);
+public void DisplayClockInfo(int timeleft){
+    int minutes, seconds;
     minutes = timeleft/60;
     seconds = timeleft%60;
     char message[64];
