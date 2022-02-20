@@ -1,4 +1,5 @@
 #include <sourcemod>
+#include <sdkhooks>
 #include <sdktools>
 #pragma newdecls required
 #pragma semicolon 1
@@ -13,6 +14,7 @@ bool rightGamemode;
 //timers
 Handle timer1 = INVALID_HANDLE;
 Handle timer2 = INVALID_HANDLE;
+Handle timer_preventSpam = INVALID_HANDLE;
 
 //Default ConVars
 ConVar cvar_timelimit;
@@ -22,23 +24,29 @@ ConVar cvar_winlimit;
 //Custom ConVars
 ConVar mp_timelimit_improved;
 ConVar mp_timelimit_improved_visibility;
+ConVar mp_roundtime;
+ConVar round_time_override;
 
 public Plugin myinfo =
 {
 	name = "Improved Match Timer",
 	author = "Dooby Skoo",
 	description = "TF2 round win limit gets reduced after the map timer runs out on 5CP.",
-	version = "1.1.7",
+	version = "1.2.0",
 	url = "https://github.com//dewbsku"
 };
 
 public void OnPluginStart(){
     mp_timelimit_improved = CreateConVar("mp_timelimit_improved", "0", "Determines whether the plugin should do anything. 0 off (default), 1 on.", FCVAR_NONE, true, 0.0, true, 1.0);
     mp_timelimit_improved_visibility = CreateConVar("mp_timelimit_improved_visibility", "0", "Removes the timer when a team reaches 4 rounds won. 0 off (default), 1 on.", FCVAR_NONE, true, 0.0, true, 1.0);
+    mp_roundtime = CreateConVar("mp_roundtime", "-1", "The length (in seconds) of the round timer on 5CP and KOTH. -1 Default gametype behavior (default)", FCVAR_NONE, true, -1.0, false);
+    round_time_override = CreateConVar("round_time_override", "-1", "The length (in seconds) of the round timer on 5CP and KOTH. -1 Default gametype behavior (default)", FCVAR_NONE, true, -1.0, false);
     cvar_timelimit = FindConVar("mp_timelimit");
     cvar_restartgame = FindConVar("mp_restartgame");
     cvar_winlimit = FindConVar("mp_winlimit");
     cvar_restartgame.AddChangeHook(OnRestartGame);
+    mp_roundtime.AddChangeHook(OnChangeRoundTime);
+    round_time_override.AddChangeHook(OnChangeRoundTime);
     AddCommandListener(OnExec, "exec");
 }
 
@@ -51,10 +59,40 @@ public void OnMapStart()
 {
     timer1 = INVALID_HANDLE;
     timer2 = INVALID_HANDLE;
+    timer_preventSpam = INVALID_HANDLE;
     winlimit_original = -1;
     timelimit_original = -1;
     GetCurrentMap(mapname, sizeof(mapname));
     rightGamemode = (StrContains(mapname, "cp_", true) == 0);
+}
+
+public void OnChangeRoundTime(ConVar convar, char[] oldValue, char[] newValue){
+    if(convar!=mp_roundtime) mp_roundtime.SetFloat(StringToFloat(newValue));
+    if(convar!=round_time_override) round_time_override.SetFloat(StringToFloat(newValue));
+}
+
+public void OnEntityCreated(int entity, const char[] classname)
+{
+	if (mp_roundtime.IntValue < 0)
+		return;
+	
+	if (StrEqual(classname, "team_round_timer"))
+	{
+        SDKHook(entity, SDKHook_SpawnPost, timer_spawn_post);
+	}
+}
+
+public void timer_spawn_post(int timer)
+{
+    SetVariantInt(mp_roundtime.IntValue);
+    AcceptEntityInput(timer, "SetMaxTime");
+    if(timer_preventSpam==INVALID_HANDLE)PrintToChatAll("Overrode round timer time to %d seconds", mp_roundtime.IntValue);
+    if(timer_preventSpam==INVALID_HANDLE)timer_preventSpam = CreateTimer(1.0, preventSpam, _, TIMER_FLAG_NO_MAPCHANGE);
+}
+
+public Action preventSpam(Handle timer){
+    timer_preventSpam = INVALID_HANDLE;
+    return Plugin_Stop;
 }
 
 public void OnRestartGame(ConVar convar, char[] oldValue, char[] newValue){
