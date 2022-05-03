@@ -18,6 +18,10 @@
 
 # Options
  mp_timelimit_improved: Enables the plugin's match timer related behaviors. 0 off (default), 1 on.
+
  mp_timelimit_improved_visibility: Hides the match timer when a team reaches 4 rounds won. 0 off (default), 1 on.
+
  mp_roundtime / round_time_override: Changes the length (in seconds) of the round timer in 5CP and KOTH. -1 for default gametype behavior (default).
+
+ sm_improvedtimers_chat: If 1 (default), prints timer related notifications to chat.
 

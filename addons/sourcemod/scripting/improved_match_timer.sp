@@ -26,14 +26,15 @@ ConVar mp_timelimit_improved;
 ConVar mp_timelimit_improved_visibility;
 ConVar mp_roundtime;
 ConVar round_time_override;
+ConVar sm_improvedtimers_chat;
 
 public Plugin myinfo =
 {
 	name = "Improved Match Timer",
 	author = "Dooby Skoo",
 	description = "TF2 round win limit gets reduced after the map timer runs out on 5CP.",
-	version = "1.2.0",
-	url = "https://github.com//dewbsku"
+	version = "1.2.1",
+	url = "https://github.com/dewbsku"
 };
 
 public void OnPluginStart(){
@@ -41,6 +42,7 @@ public void OnPluginStart(){
     mp_timelimit_improved_visibility = CreateConVar("mp_timelimit_improved_visibility", "0", "Removes the timer when a team reaches 4 rounds won. 0 off (default), 1 on.", FCVAR_NONE, true, 0.0, true, 1.0);
     mp_roundtime = CreateConVar("mp_roundtime", "-1", "The length (in seconds) of the round timer on 5CP and KOTH. -1 Default gametype behavior (default)", FCVAR_NONE, true, -1.0, false);
     round_time_override = CreateConVar("round_time_override", "-1", "The length (in seconds) of the round timer on 5CP and KOTH. -1 Default gametype behavior (default)", FCVAR_NONE, true, -1.0, false);
+    sm_improvedtimers_chat = CreateConVar("sm_improvedtimers_chat", "1", "If 1, prints timer related notifications to chat.", FCVAR_NONE, true, 0.0, true, 0.0);
     cvar_timelimit = FindConVar("mp_timelimit");
     cvar_restartgame = FindConVar("mp_restartgame");
     cvar_winlimit = FindConVar("mp_winlimit");
@@ -86,7 +88,7 @@ public void timer_spawn_post(int timer)
 {
     SetVariantInt(mp_roundtime.IntValue);
     AcceptEntityInput(timer, "SetMaxTime");
-    if(timer_preventSpam==INVALID_HANDLE)PrintToChatAll("Overrode round timer time to %d seconds", mp_roundtime.IntValue);
+    if(timer_preventSpam==INVALID_HANDLE && sm_improvedtimers_chat.BoolValue)PrintToChatAll("Overrode round timer time to %d seconds", mp_roundtime.IntValue);
     if(timer_preventSpam==INVALID_HANDLE)timer_preventSpam = CreateTimer(1.0, preventSpam, _, TIMER_FLAG_NO_MAPCHANGE);
 }
 
@@ -115,7 +117,7 @@ public void OnRestartGame(ConVar convar, char[] oldValue, char[] newValue){
 }
 
 public Action WaitTime(Handle timer){
-    PrintToChatAll("Running Improved Match Timer.");
+    if(sm_improvedtimers_chat.BoolValue) PrintToChatAll("Running Improved Match Timer.");
     PrintToServer("Running Improved Match Timer.");
     doOnRestart = true;
     timer2 = CreateTimer(0.5, CheckRoundTime, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
@@ -125,8 +127,8 @@ public Action WaitTime(Handle timer){
 public Action CheckRoundTime(Handle timer){
     int timeleft;
     GetMapTimeLeft(timeleft);
-    if(timeleft>=300 && timeleft%300==0 && (timeleft!=lastTimeReported)) DisplayClockInfo(timeleft);
-    if(timeleft<300 && timeleft%60==0 && (timeleft!=lastTimeReported)) DisplayClockInfo(timeleft);
+    if(timeleft>=300 && timeleft%300==0 && (timeleft!=lastTimeReported) && sm_improvedtimers_chat.BoolValue) DisplayClockInfo(timeleft);
+    if(timeleft<300 && timeleft%60==0 && (timeleft!=lastTimeReported) && sm_improvedtimers_chat.BoolValue) DisplayClockInfo(timeleft);
     lastTimeReported = timeleft;
     if(timeleft<=1){
         ServerCommand("mp_timelimit 0");
@@ -135,7 +137,7 @@ public Action CheckRoundTime(Handle timer){
         if(newRoundLimit>5) newRoundLimit = 5;
         if(newRoundLimit<5){
             ServerCommand("mp_winlimit %d", newRoundLimit);
-            PrintToChatAll("New Round Limit: %d", newRoundLimit);
+            if(sm_improvedtimers_chat.BoolValue) PrintToChatAll("New Round Limit: %d", newRoundLimit);
         }
         for(int client=1;client<=MAXPLAYERS;client++){
             if(IsValidClient(client)){
